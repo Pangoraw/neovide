@@ -1,7 +1,9 @@
 #[macro_use]
 mod layouts;
 
-use super::{handle_new_grid_size, keyboard::neovim_keybinding_string, WindowSettings};
+use super::{
+    handle_new_grid_size, keyboard::neovim_keybinding_string, CacheSettings, WindowSettings,
+};
 use crate::{
     bridge::UiCommand, editor::WindowCommand, error_handling::ResultPanicExplanation,
     redraw_scheduler::REDRAW_SCHEDULER, renderer::Renderer, settings::SETTINGS,
@@ -34,6 +36,19 @@ use std::{
 #[derive(RustEmbed)]
 #[folder = "assets/"]
 struct Asset;
+
+fn maybe_save_new_size(new_size: LogicalSize) {
+    let stdpath = SETTINGS.get::<CacheSettings>().stdpath;
+    if stdpath.is_empty() {
+        return;
+    }
+
+    let stdpath = std::path::PathBuf::from(stdpath);
+    let save_file = stdpath.join("neovide_settings.txt");
+
+    let formatted_new_pos = format!("window_dimensions={}x{}", new_size.width, new_size.height);
+    std::fs::write(save_file, formatted_new_pos).unwrap();
+}
 
 pub struct Sdl2WindowWrapper {
     context: Sdl,
@@ -351,6 +366,7 @@ impl Sdl2WindowWrapper {
         let sdl_window_wrapper = Sdl2Window::new(&self.window);
         let new_size = sdl_window_wrapper.logical_size();
         if self.previous_size != new_size {
+            maybe_save_new_size(new_size);
             handle_new_grid_size(new_size, &self.renderer, &self.ui_command_sender);
             self.previous_size = new_size;
         }

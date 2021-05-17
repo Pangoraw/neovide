@@ -277,6 +277,13 @@ async fn start_neovim_runtime(
         .await
         .unwrap_or_explained_panic("Could not attach ui to neovim process");
 
+    // Initial value for neovide_stdpath
+    if nvim.get_var("neovide_stdpath").await.is_err() {
+        if let Ok(stdpath) = nvim.eval("stdpath(\"data\")").await {
+            nvim.set_var("neovide_stdpath", stdpath).await.unwrap();
+        }
+    }
+
     info!("Neovim process attached");
 
     let nvim = Arc::new(nvim);

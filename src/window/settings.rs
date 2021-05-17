@@ -9,6 +9,7 @@ pub struct WindowSettings {
     pub no_idle: bool,
     pub fullscreen: bool,
     pub iso_layout: bool,
+    pub remember_dimensions: bool,
 }
 
 impl Default for WindowSettings {
@@ -21,6 +22,12 @@ impl Default for WindowSettings {
                 .contains(&String::from("--noIdle")),
             fullscreen: false,
             iso_layout: false,
+            remember_dimensions: false,
         }
     }
+}
+
+#[derive(Debug, Clone, Default, SettingGroup)]
+pub struct CacheSettings {
+    pub stdpath: String,
 }

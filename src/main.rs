@@ -26,7 +26,7 @@ use crossfire::mpsc::unbounded_future;
 use bridge::start_bridge;
 use editor::start_editor;
 use renderer::{cursor_renderer::CursorSettings, RendererSettings};
-use window::{create_window, window_geometry, KeyboardSettings, WindowSettings};
+use window::{create_window, CacheSettings, KeyboardSettings, WindowSettings};
 use windows_utils::attach_parent_console;
 
 pub const INITIAL_DIMENSIONS: (u64, u64) = (100, 50);
@@ -113,11 +113,6 @@ fn main() {
         return;
     }
 
-    if let Err(err) = window_geometry() {
-        eprintln!("{}", err);
-        return;
-    }
-
     #[cfg(target_os = "macos")]
     {
         // incase of app bundle, we can just pass --disowned option straight away to bypass this check
@@ -154,6 +149,7 @@ fn main() {
         }
     }
 
+    CacheSettings::register();
     KeyboardSettings::register();
     WindowSettings::register();
     redraw_scheduler::RedrawSettings::register();
@@ -179,6 +175,7 @@ fn main() {
         batched_draw_command_sender,
         window_command_sender,
     );
+    println!("creating window");
     create_window(
         batched_draw_command_receiver,
         window_command_receiver,

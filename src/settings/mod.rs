@@ -136,6 +136,7 @@ impl Settings {
             let variable_name = format!("neovide_{}", name.to_string());
             match nvim.get_var(&variable_name).await {
                 Ok(value) => {
+                    println!("read value {:?} for {}", value, variable_name);
                     self.listeners.read().get(&name).unwrap()(value);
                 }
                 Err(error) => {
